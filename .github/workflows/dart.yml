@@ -1,0 +1,34 @@
+name: Build and Release apk
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+    steps:
+    # Setup Java environment in order to build the Android app.
+    - uses: actions/checkout@v2
+      with:
+        lfs: true
+    # Pull lfs objects
+    - run: git lfs checkout
+    - uses: actions/setup-java@v1
+      with:
+        java-version: '12.x'
+    # Setup the flutter environment.
+    - uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable' # 'dev', 'alpha', default to: 'stable'
+    - run: flutter pub get
+    - run: flutter build apk --ignore-deprecation
+    - uses: actions/upload-artifact@v2
+      with:
+        name: release
+        path: build/app/outputs/apk/release/app.apk
